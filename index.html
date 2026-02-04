@@ -105,4 +105,68 @@
             }
 
             // Griglia
-            grid.innerHTML = db.sort((a,b) => a.id - b
+            grid.innerHTML = db.sort((a,b) => a.id - b.id).map(p => `
+                <div class="box ${p.estratto ? 'estratto' : 'rimanente'}">
+                    ${p.id} <span>${p.nome}</span>
+                </div>
+            `).join('');
+
+            // Timer logica
+            const mancano = Math.max(0, Math.ceil((ultimoTs + COOLDOWN - Date.now()) / 1000));
+            const btn = document.getElementById('btn-estrai');
+            const disponibili = db.filter(p => !p.estratto).length;
+
+            if (disponibili === 0) {
+                btn.disabled = true;
+                btn.innerText = "FINITO";
+            } else if (mancano > 0) {
+                btn.disabled = true;
+                document.getElementById('messaggio').innerText = `Attendi ${mancano}s...`;
+                setTimeout(aggiornaUI, 1000);
+            } else {
+                btn.disabled = false;
+                btn.innerText = "ESTRAI ORA";
+                document.getElementById('messaggio').innerText = "";
+            }
+        }
+
+        function avviaEstrazione() {
+            const numEl = document.getElementById('numero-estratto');
+            numEl.classList.add('rolling');
+            document.getElementById('btn-estrai').disabled = true;
+
+            let count = 0;
+            const timer = setInterval(() => {
+                numEl.innerText = Math.floor(Math.random() * 99);
+                if (++count > 12) {
+                    clearInterval(timer);
+                    numEl.classList.remove('rolling');
+                    estrai();
+                }
+            }, 80);
+        }
+
+        function estrai() {
+            const liberi = db.filter(p => !p.estratto);
+            if (liberi.length === 0) return;
+
+            const scelto = liberi[Math.floor(Math.random() * liberi.length)];
+            scelto.estratto = true;
+
+            localStorage.setItem('ultimo_id', scelto.id);
+            localStorage.setItem('ultimo_ts', Date.now());
+            salva();
+            aggiornaUI();
+        }
+
+        function resetGame() {
+            if(confirm("Vuoi resettare tutte le estrazioni?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
