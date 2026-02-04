@@ -137,7 +137,7 @@
             const scelto = disponibili[Math.floor(Math.random() * disponibili.length)];
             
             // AGGIORNIAMO IL JSON (nello stato locale)
-            scelto.estratto = true; // Imposta estratto su true
+            scelto.estratto = true;
 
             localStorage.setItem('ultimo_id', scelto.id);
             localStorage.setItem('ultimo_ts', Date.now());
