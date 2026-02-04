@@ -3,67 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estrattore Giornaliero</title>
+    <title>Estrattore al Minuto</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #333; }
-        #numero-estratto { font-size: 4rem; font-weight: bold; color: #007bff; margin: 20px 0; }
-        button { padding: 10px 20px; font-size: 1.1rem; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; transition: 0.3s; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        button:hover:not(:disabled) { background-color: #0056b3; }
-        p { color: #666; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #eef2f3; }
+        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
+        #numero-estratto { font-size: 5rem; font-weight: bold; color: #2ecc71; margin: 15px 0; min-height: 100px; }
+        button { padding: 12px 25px; font-size: 1rem; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .info { margin-top: 20px; font-size: 0.9rem; color: #7f8c8d; }
+        .lista-rimanenti { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+        #numeri-lista { font-weight: bold; color: #34495e; word-wrap: break-word; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>Numero del Giorno</h1>
+        <h2 id="titolo">Estrai un numero</h2>
         <div id="numero-estratto">--</div>
-        <button id="btn-estrai" onclick="estraiNumero()">Estrai Numero</button>
-        <p id="messaggio"></p>
+        <button id="btn-estrai" onclick="estraiNumero()">ESTRAI ORA</button>
+        
+        <p id="messaggio" class="info"></p>
+
+        <div class="lista-rimanenti">
+            <p>Numeri ancora disponibili:</p>
+            <div id="numeri-lista"></div>
+        </div>
     </div>
 
     <script>
-        // La tua lista di numeri
-        const listaNumeri = [10, 25, 42, 7, 99, 13, 88, 54, 21, 33];
+        // La tua lista iniziale
+        let listaNumeri = [10, 25, 42, 7, 99, 13, 88, 54, 21, 33];
 
         const displayNumero = document.getElementById('numero-estratto');
         const btnEstrai = document.getElementById('btn-estrai');
         const messaggio = document.getElementById('messaggio');
+        const displayLista = document.getElementById('numeri-lista');
 
-        function controllaStato() {
-            const ultimaEstrazione = localStorage.getItem('dataEstrazione');
-            const numeroSalvato = localStorage.getItem('numeroEstratto');
-            const oggi = new Date().toDateString();
+        function aggiornaInterfaccia() {
+            const ultimoMinuto = localStorage.getItem('ultimoMinuto');
+            const numeroSalvato = localStorage.getItem('numeroSalvato');
+            
+            // Creiamo una stringa univoca per il minuto corrente (es: "2026-02-04-16:45")
+            const oraAttuale = new Date();
+            const IDMinutoCorrente = `${oraAttuale.getFullYear()}-${oraAttuale.getMonth()}-${oraAttuale.getDate()}-${oraAttuale.getHours()}:${oraAttuale.getMinutes()}`;
 
-            if (ultimaEstrazione === oggi) {
-                // È già stato estratto un numero oggi
+            // Recupera lista aggiornata dal storage o usa quella base
+            const listaSalvata = JSON.parse(localStorage.getItem('listaRimanente'));
+            if (listaSalvata) listaNumeri = listaSalvata;
+
+            displayLista.innerText = listaNumeri.join(", ");
+
+            if (ultimoMinuto === IDMinutoCorrente) {
                 displayNumero.innerText = numeroSalvato;
                 btnEstrai.disabled = true;
-                messaggio.innerText = "Hai già estratto il numero per oggi. Torna domani!";
+                messaggio.innerText = "Hai già estratto per questo minuto. Attendi il prossimo!";
+            } else {
+                if (listaNumeri.length === 0) {
+                    btnEstrai.disabled = true;
+                    messaggio.innerText = "Lista esaurita!";
+                } else {
+                    btnEstrai.disabled = false;
+                    messaggio.innerText = "Puoi estrarre un nuovo numero!";
+                }
             }
         }
 
         function estraiNumero() {
-            const oggi = new Date().toDateString();
+            if (listaNumeri.length === 0) return;
+
+            const oraAttuale = new Date();
+            const IDMinutoCorrente = `${oraAttuale.getFullYear()}-${oraAttuale.getMonth()}-${oraAttuale.getDate()}-${oraAttuale.getHours()}:${oraAttuale.getMinutes()}`;
             
-            // Logica di estrazione casuale
-            const indiceCasuale = Math.floor(Math.random() * listaNumeri.length);
-            const numeroScelto = listaNumeri[indiceCasuale];
+            // Estrazione
+            const indice = Math.floor(Math.random() * listaNumeri.length);
+            const estratto = listaNumeri.splice(indice, 1)[0];
 
-            // Salvataggio nel browser
-            localStorage.setItem('dataEstrazione', oggi);
-            localStorage.setItem('numeroEstratto', numeroScelto);
+            // Salvataggio
+            localStorage.setItem('ultimoMinuto', IDMinutoCorrente);
+            localStorage.setItem('numeroSalvato', estratto);
+            localStorage.setItem('listaRimanente', JSON.stringify(listaNumeri));
 
-            // Aggiornamento UI
-            displayNumero.innerText = numeroScelto;
-            btnEstrai.disabled = true;
-            messaggio.innerText = "Numero salvato! Torna domani per una nuova estrazione.";
+            displayNumero.innerText = estratto;
+            aggiornaInterfaccia();
         }
 
-        // Carica lo stato all'avvio
-        controllaStato();
+        // Controlla ogni 5 secondi se è scattato il nuovo minuto per riattivare il bottone automaticamente
+        setInterval(aggiornaInterfaccia, 5000);
+        
+        // Primo avvio
+        aggiornaInterfaccia();
     </script>
 </body>
 </html>
