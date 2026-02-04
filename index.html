@@ -3,95 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estrattore al Minuto</title>
+    <title>Estrattore Rapido</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #eef2f3; }
-        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
-        #numero-estratto { font-size: 5rem; font-weight: bold; color: #2ecc71; margin: 15px 0; min-height: 100px; }
-        button { padding: 12px 25px; font-size: 1rem; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; }
-        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        .info { margin-top: 20px; font-size: 0.9rem; color: #7f8c8d; }
-        .lista-rimanenti { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
-        #numeri-lista { font-weight: bold; color: #34495e; word-wrap: break-word; }
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        
+        /* Numero Principale */
+        #numero-estratto { font-size: 6rem; font-weight: 800; color: var(--primary); margin: 10px 0; transition: transform 0.3s ease; }
+        
+        /* Bottone e Messaggi */
+        button { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        #messaggio { font-size: 0.9rem; margin-top: 10px; color: #64748b; min-height: 1.2em; }
+
+        /* Griglie Numeri */
+        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 20px 0 10px; text-align: left; }
+        .grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+        .box { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid #e2e8f0; }
+        .box-rimanente { background: #f1f5f9; color: #475569; }
+        .box-estratto { background: #dcfce7; color: #166534; border-color: #bbf7d0; animation: pop 0.3s ease; }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2 id="titolo">Estrai un numero</h2>
+    <div class="container">
+        <h2 style="margin:0; color:#1e293b;">Estrattore 5s</h2>
         <div id="numero-estratto">--</div>
-        <button id="btn-estrai" onclick="estraiNumero()">ESTRAI ORA</button>
         
-        <p id="messaggio" class="info"></p>
+        <button id="btn-estrai" onclick="estraiNumero()">ESTRAI NUMERO</button>
+        <p id="messaggio"></p>
 
-        <div class="lista-rimanenti">
-            <p>Numeri ancora disponibili:</p>
-            <div id="numeri-lista"></div>
-        </div>
+        <div class="section-title">Numeri Estratti (Ordinati)</div>
+        <div id="lista-estratti" class="grid"></div>
+
+        <div class="section-title">Numeri Rimanenti (In coda)</div>
+        <div id="lista-rimanenti" class="grid"></div>
     </div>
 
     <script>
-        // La tua lista iniziale
-        let listaNumeri = [10, 25, 42, 7, 99, 13, 88, 54, 21, 33];
+        // Setup iniziale
+        const LISTA_INIZIALE = [10, 25, 42, 7, 99, 13, 88, 54, 21, 33, 5, 67, 12];
+        const ATTESA_MS = 5000; // 5 secondi per il test
 
-        const displayNumero = document.getElementById('numero-estratto');
-        const btnEstrai = document.getElementById('btn-estrai');
-        const messaggio = document.getElementById('messaggio');
-        const displayLista = document.getElementById('numeri-lista');
+        function init() {
+            if (!localStorage.getItem('rimanenti')) {
+                localStorage.setItem('rimanenti', JSON.stringify(LISTA_INIZIALE.sort((a,b) => a-b)));
+                localStorage.setItem('estratti', JSON.stringify([]));
+            }
+            aggiornaUI();
+        }
 
-        function aggiornaInterfaccia() {
-            const ultimoMinuto = localStorage.getItem('ultimoMinuto');
-            const numeroSalvato = localStorage.getItem('numeroSalvato');
+        function aggiornaUI() {
+            const rimanenti = JSON.parse(localStorage.getItem('rimanenti'));
+            const estratti = JSON.parse(localStorage.getItem('estratti')).sort((a,b) => a-b);
+            const ultimaEstrazione = parseInt(localStorage.getItem('timestampUltima')) || 0;
+            const ultimoNumero = localStorage.getItem('ultimoNumero') || "--";
             
-            // Creiamo una stringa univoca per il minuto corrente (es: "2026-02-04-16:45")
-            const oraAttuale = new Date();
-            const IDMinutoCorrente = `${oraAttuale.getFullYear()}-${oraAttuale.getMonth()}-${oraAttuale.getDate()}-${oraAttuale.getHours()}:${oraAttuale.getMinutes()}`;
+            const ora = Date.now();
+            const mancano = Math.max(0, Math.ceil((ultimaEstrazione + ATTESA_MS - ora) / 1000));
 
-            // Recupera lista aggiornata dal storage o usa quella base
-            const listaSalvata = JSON.parse(localStorage.getItem('listaRimanente'));
-            if (listaSalvata) listaNumeri = listaSalvata;
+            // Visualizza numero principale
+            document.getElementById('numero-estratto').innerText = ultimoNumero;
 
-            displayLista.innerText = listaNumeri.join(", ");
+            // Griglia Rimanenti
+            const divRim = document.getElementById('lista-rimanenti');
+            divRim.innerHTML = rimanenti.map(n => `<div class="box box-rimanente">${n}</div>`).join('');
 
-            if (ultimoMinuto === IDMinutoCorrente) {
-                displayNumero.innerText = numeroSalvato;
-                btnEstrai.disabled = true;
-                messaggio.innerText = "Hai già estratto per questo minuto. Attendi il prossimo!";
+            // Griglia Estratti
+            const divEst = document.getElementById('lista-estratti');
+            divEst.innerHTML = estratti.map(n => `<div class="box box-estratto">${n}</div>`).join('');
+
+            // Gestione Bottone e Timer
+            const btn = document.getElementById('btn-estrai');
+            const msg = document.getElementById('messaggio');
+
+            if (rimanenti.length === 0) {
+                btn.disabled = true;
+                msg.innerText = "Tutti i numeri sono stati estratti!";
+            } else if (mancano > 0) {
+                btn.disabled = true;
+                msg.innerText = `Attendi ${mancano} secondi per la prossima estrazione...`;
+                setTimeout(aggiornaUI, 1000);
             } else {
-                if (listaNumeri.length === 0) {
-                    btnEstrai.disabled = true;
-                    messaggio.innerText = "Lista esaurita!";
-                } else {
-                    btnEstrai.disabled = false;
-                    messaggio.innerText = "Puoi estrarre un nuovo numero!";
-                }
+                btn.disabled = false;
+                msg.innerText = "Pronto per una nuova estrazione!";
             }
         }
 
         function estraiNumero() {
-            if (listaNumeri.length === 0) return;
+            let rimanenti = JSON.parse(localStorage.getItem('rimanenti'));
+            let estratti = JSON.parse(localStorage.getItem('estratti'));
 
-            const oraAttuale = new Date();
-            const IDMinutoCorrente = `${oraAttuale.getFullYear()}-${oraAttuale.getMonth()}-${oraAttuale.getDate()}-${oraAttuale.getHours()}:${oraAttuale.getMinutes()}`;
-            
-            // Estrazione
-            const indice = Math.floor(Math.random() * listaNumeri.length);
-            const estratto = listaNumeri.splice(indice, 1)[0];
+            if (rimanenti.length === 0) return;
 
-            // Salvataggio
-            localStorage.setItem('ultimoMinuto', IDMinutoCorrente);
-            localStorage.setItem('numeroSalvato', estratto);
-            localStorage.setItem('listaRimanente', JSON.stringify(listaNumeri));
+            // Estrazione casuale dalla lista rimanenti
+            const indice = Math.floor(Math.random() * rimanenti.length);
+            const numero = rimanenti.splice(indice, 1)[0];
+            estratti.push(numero);
 
-            displayNumero.innerText = estratto;
-            aggiornaInterfaccia();
+            // Salvataggio (mantenendo la lista rimanenti ordinata per la UI)
+            localStorage.setItem('rimanenti', JSON.stringify(rimanenti.sort((a,b) => a-b)));
+            localStorage.setItem('estratti', JSON.stringify(estratti));
+            localStorage.setItem('timestampUltima', Date.now());
+            localStorage.setItem('ultimoNumero', numero);
+
+            aggiornaUI();
         }
 
-        // Controlla ogni 5 secondi se è scattato il nuovo minuto per riattivare il bottone automaticamente
-        setInterval(aggiornaInterfaccia, 5000);
-        
-        // Primo avvio
-        aggiornaInterfaccia();
+        init();
     </script>
 </body>
 </html>
