@@ -3,120 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estrattore Rapido</title>
+    <title>Disney Lotto 5s</title>
     <style>
         :root {
             --primary: #6366f1;
-            --bg: #f8fafc;
+            --accent: #f59e0b;
+            --bg: #f1f5f9;
             --card: #ffffff;
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .container { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
         
-        /* Numero Principale */
-        #numero-estratto { font-size: 6rem; font-weight: 800; color: var(--primary); margin: 10px 0; transition: transform 0.3s ease; }
+        /* Display Principale */
+        .slot-machine { height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px 0; overflow: hidden; }
+        #numero-estratto { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 0; line-height: 1; }
+        #nome-estratto { font-size: 1.2rem; color: var(--accent); font-weight: 600; min-height: 1.5em; }
         
-        /* Bottone e Messaggi */
-        button { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; }
-        button:disabled { background: #cbd5e1; cursor: not-allowed; }
-        #messaggio { font-size: 0.9rem; margin-top: 10px; color: #64748b; min-height: 1.2em; }
-
-        /* Griglie Numeri */
-        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 20px 0 10px; text-align: left; }
-        .grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
-        .box { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid #e2e8f0; }
-        .box-rimanente { background: #f1f5f9; color: #475569; }
-        .box-estratto { background: #dcfce7; color: #166534; border-color: #bbf7d0; animation: pop 0.3s ease; }
-
-        @keyframes pop {
-            0% { transform: scale(0.8); }
-            100% { transform: scale(1); }
+        /* Animazione Rullata */
+        .rolling { animation: shake 0.1s infinite; color: #cbd5e1 !important; }
+        @keyframes shake {
+            0% { transform: translateY(-5px); }
+            100% { transform: translateY(5px); }
         }
+
+        button { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; box-shadow: 0 4px 0 #4338ca; }
+        button:active { transform: translateY(3px); box-shadow: none; }
+        button:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
+        
+        #messaggio { font-size: 0.85rem; margin: 15px 0; color: #64748b; height: 1em; }
+
+        /* Griglie */
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin: 25px 0 10px; text-align: left; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
+        .grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+        
+        /* Badge Numero */
+        .box { padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
+        .box-estratto { background: #fff7ed; border-color: #ffedd5; color: #9a3412; display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+        .box-estratto span { font-size: 0.6rem; font-weight: 400; color: #c2410c; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="margin:0; color:#1e293b;">Estrattore 5s</h2>
-        <div id="numero-estratto">--</div>
+        <h2 style="margin:0; color:#1e293b;">Disney Extractions</h2>
         
-        <button id="btn-estrai" onclick="estraiNumero()">ESTRAI NUMERO</button>
+        <div class="slot-machine">
+            <p id="numero-estratto">--</p>
+            <p id="nome-estratto">Scegli un personaggio</p>
+        </div>
+        
+        <button id="btn-estrai" onclick="avviaEstrazione()">GIOCA ORA</button>
         <p id="messaggio"></p>
 
-        <div class="section-title">Numeri Estratti (Ordinati)</div>
+        <div class="section-title">✨ Già Estratti (Numero + Nome)</div>
         <div id="lista-estratti" class="grid"></div>
 
-        <div class="section-title">Numeri Rimanenti (In coda)</div>
+        <div class="section-title">🗳️ Ancora nel sacco (Solo Numeri)</div>
         <div id="lista-rimanenti" class="grid"></div>
     </div>
 
     <script>
-        // Setup iniziale
-        const LISTA_INIZIALE = [10, 25, 42, 7, 99, 13, 88, 54, 21, 33, 5, 67, 12];
-        const ATTESA_MS = 5000; // 5 secondi per il test
+        const DATABASE = {
+            1: "Topolino", 2: "Paperino", 3: "Pippo", 4: "Pluto", 5: "Minnie",
+            6: "Paperina", 7: "Zio Paperone", 8: "Simba", 9: "Aladdin", 10: "Bambi",
+            11: "Cenerentola", 12: "Mulan", 13: "Hercules", 14: "Tarzan", 15: "Stitch"
+        };
+
+        const ATTESA_MS = 5000;
 
         function init() {
-            if (!localStorage.getItem('rimanenti')) {
-                localStorage.setItem('rimanenti', JSON.stringify(LISTA_INIZIALE.sort((a,b) => a-b)));
-                localStorage.setItem('estratti', JSON.stringify([]));
+            if (!localStorage.getItem('rimanenti_disney')) {
+                localStorage.setItem('rimanenti_disney', JSON.stringify(Object.keys(DATABASE).map(Number)));
+                localStorage.setItem('estratti_disney', JSON.stringify([]));
             }
             aggiornaUI();
         }
 
         function aggiornaUI() {
-            const rimanenti = JSON.parse(localStorage.getItem('rimanenti'));
-            const estratti = JSON.parse(localStorage.getItem('estratti')).sort((a,b) => a-b);
-            const ultimaEstrazione = parseInt(localStorage.getItem('timestampUltima')) || 0;
-            const ultimoNumero = localStorage.getItem('ultimoNumero') || "--";
-            
-            const ora = Date.now();
-            const mancano = Math.max(0, Math.ceil((ultimaEstrazione + ATTESA_MS - ora) / 1000));
+            const rimanenti = JSON.parse(localStorage.getItem('rimanenti_disney')).sort((a,b) => a-b);
+            const estratti = JSON.parse(localStorage.getItem('estratti_disney')).sort((a,b) => a-b);
+            const ultima = parseInt(localStorage.getItem('ts_disney')) || 0;
+            const ultimoID = localStorage.getItem('ultimo_id');
 
-            // Visualizza numero principale
-            document.getElementById('numero-estratto').innerText = ultimoNumero;
+            // Update numero principale
+            if(ultimoID) {
+                document.getElementById('numero-estratto').innerText = ultimoID;
+                document.getElementById('nome-estratto').innerText = DATABASE[ultimoID];
+            }
 
-            // Griglia Rimanenti
-            const divRim = document.getElementById('lista-rimanenti');
-            divRim.innerHTML = rimanenti.map(n => `<div class="box box-rimanente">${n}</div>`).join('');
+            // Lista Rimanenti (Solo Numeri)
+            document.getElementById('lista-rimanenti').innerHTML = rimanenti
+                .map(n => `<div class="box">${n}</div>`).join('');
 
-            // Griglia Estratti
-            const divEst = document.getElementById('lista-estratti');
-            divEst.innerHTML = estratti.map(n => `<div class="box box-estratto">${n}</div>`).join('');
+            // Lista Estratti (Numero + Nome)
+            document.getElementById('lista-estratti').innerHTML = estratti
+                .map(n => `<div class="box box-estratto">${n}<span>${DATABASE[n]}</span></div>`).join('');
 
-            // Gestione Bottone e Timer
+            // Timer
+            const mancano = Math.max(0, Math.ceil((ultima + ATTESA_MS - Date.now()) / 1000));
             const btn = document.getElementById('btn-estrai');
             const msg = document.getElementById('messaggio');
 
-            if (rimanenti.length === 0) {
+            if (rimanenti.length === 0 && !localStorage.getItem('is_rolling')) {
                 btn.disabled = true;
-                msg.innerText = "Tutti i numeri sono stati estratti!";
+                msg.innerText = "Cast completo! Tutti i personaggi sono usciti.";
             } else if (mancano > 0) {
                 btn.disabled = true;
-                msg.innerText = `Attendi ${mancano} secondi per la prossima estrazione...`;
+                msg.innerText = `Prossimo tour tra ${mancano}s...`;
                 setTimeout(aggiornaUI, 1000);
             } else {
                 btn.disabled = false;
-                msg.innerText = "Pronto per una nuova estrazione!";
+                msg.innerText = "Pronto per l'estrazione!";
             }
         }
 
-        function estraiNumero() {
-            let rimanenti = JSON.parse(localStorage.getItem('rimanenti'));
-            let estratti = JSON.parse(localStorage.getItem('estratti'));
+        function avviaEstrazione() {
+            const btn = document.getElementById('btn-estrai');
+            const numDisplay = document.getElementById('numero-estratto');
+            const nomeDisplay = document.getElementById('nome-estratto');
+            
+            btn.disabled = true;
+            localStorage.setItem('is_rolling', 'true');
+            numDisplay.classList.add('rolling');
+            nomeDisplay.innerText = "Estrazione in corso...";
 
-            if (rimanenti.length === 0) return;
+            // Effetto "Finta rullata"
+            let giri = 0;
+            const intervallo = setInterval(() => {
+                numDisplay.innerText = Math.floor(Math.random() * 99);
+                giri++;
+                if (giri > 10) {
+                    clearInterval(intervallo);
+                    eseguiEstrazioneReale();
+                }
+            }, 100);
+        }
 
-            // Estrazione casuale dalla lista rimanenti
+        function eseguiEstrazioneReale() {
+            let rimanenti = JSON.parse(localStorage.getItem('rimanenti_disney'));
+            let estratti = JSON.parse(localStorage.getItem('estratti_disney'));
+            const numDisplay = document.getElementById('numero-estratto');
+
             const indice = Math.floor(Math.random() * rimanenti.length);
-            const numero = rimanenti.splice(indice, 1)[0];
-            estratti.push(numero);
+            const scelto = rimanenti.splice(indice, 1)[0];
+            estratti.push(scelto);
 
-            // Salvataggio (mantenendo la lista rimanenti ordinata per la UI)
-            localStorage.setItem('rimanenti', JSON.stringify(rimanenti.sort((a,b) => a-b)));
-            localStorage.setItem('estratti', JSON.stringify(estratti));
-            localStorage.setItem('timestampUltima', Date.now());
-            localStorage.setItem('ultimoNumero', numero);
+            localStorage.setItem('rimanenti_disney', JSON.stringify(rimanenti));
+            localStorage.setItem('estratti_disney', JSON.stringify(estratti));
+            localStorage.setItem('ts_disney', Date.now());
+            localStorage.setItem('ultimo_id', scelto);
+            localStorage.removeItem('is_rolling');
 
+            numDisplay.classList.remove('rolling');
             aggiornaUI();
         }
 
