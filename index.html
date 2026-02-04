@@ -3,149 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disney Status Lotto</title>
+    <title>Disney Lotto Pro</title>
     <style>
         :root { --primary: #6366f1; --accent: #f59e0b; --bg: #f8fafc; --card: #ffffff; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; text-align: center; }
         
-        /* Display */
-        .slot { height: 100px; margin: 20px 0; }
-        #numero-estratto { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 0; }
-        #nome-estratto { font-size: 1.2rem; color: var(--accent); font-weight: 600; }
-        .rolling { animation: blur 0.1s infinite; }
-        @keyframes blur { 0% { opacity: 0.5; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-
-        button { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; }
-        button:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-
-        /* Griglie con stato */
-        .section-title { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; margin: 25px 0 10px; text-align: left; }
-        .grid { display: flex; flex-wrap: wrap; gap: 8px; }
-        .box { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; border: 1px solid #e2e8f0; transition: 0.3s; }
+        /* Display Centrale */
+        .slot { height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px; background: #f1f5f9; border-radius: 16px; }
+        #numero-estratto { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0; }
+        #nome-estratto { font-size: 1.1rem; color: var(--accent); font-weight: 600; margin: 5px 0 0 0; }
         
-        /* Colori basati sullo stato */
-        .rimanente { background: #f1f5f9; color: #64748b; }
-        .estratto { background: #dcfce7; color: #15803d; border-color: #bbf7d0; text-decoration: line-through; opacity: 0.7; }
-        .box span { display: block; font-size: 0.6rem; text-decoration: none !important; }
+        /* Animazione */
+        .rolling { animation: shuffle 0.1s infinite; filter: blur(2px); }
+        @keyframes shuffle { 0% { transform: translateY(-2px); } 100% { transform: translateY(2px); } }
+
+        button { width: 100%; padding: 16px; font-size: 1rem; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; box-shadow: 0 4px 0 #4338ca; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #4338ca; }
+        button:disabled { background: #cbd5e1; box-shadow: none; transform: none; cursor: not-allowed; }
+
+        .info { font-size: 0.8rem; color: #94a3b8; margin: 10px 0; min-height: 1.2rem; }
+
+        /* Griglia */
+        .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin: 30px 0 10px; text-align: left; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+        .grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .box { padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; transition: 0.3s; }
+        
+        .rimanente { background: white; color: #1e293b; }
+        .estratto { background: #dcfce7; color: #15803d; border-color: #bbf7d0; text-decoration: line-through; opacity: 0.6; }
+        .box span { display: block; font-size: 0.65rem; font-weight: 400; text-decoration: none !important; }
+
+        .btn-reset { background: none; border: none; color: #94a3b8; font-size: 0.7rem; text-decoration: underline; cursor: pointer; margin-top: 20px; box-shadow: none; width: auto; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="color:#1e293b; margin:0;">Disney Lotto Status</h2>
+        <h2 style="margin-top:0; color:#1e293b;">Disney Lotto</h2>
         
         <div class="slot">
             <p id="numero-estratto">--</p>
-            <p id="nome-estratto">Caricamento...</p>
+            <p id="nome-estratto">Inizializzazione...</p>
         </div>
         
-        <button id="btn-estrai" onclick="avviaEstrazione()" disabled>GIOCA</button>
-        <p id="messaggio" style="font-size:0.8rem; color:#94a3b8; margin-top:10px;"></p>
+        <button id="btn-estrai" onclick="avviaEstrazione()" disabled>CARICAMENTO...</button>
+        <p id="messaggio" class="info"></p>
 
-        <div class="section-title">📊 Tutti i personaggi (Stato in tempo reale)</div>
+        <div class="section-title">Lista Personaggi</div>
         <div id="lista-totale" class="grid"></div>
+
+        <button class="btn-reset" onclick="resetGame()">Resetta tutto e ricarica JSON</button>
     </div>
 
     <script>
-        let personaggiiDB = [];
-        const ATTESA_MS = 5000;
+        let db = [];
+        const COOLDOWN = 5000; // 5 secondi per il test
+
+        // Lista di emergenza se il fetch fallisce (es. test in locale)
+        const backupData = [
+            { "id": 1, "nome": "Topolino", "estratto": false },
+            { "id": 2, "nome": "Paperino", "estratto": false },
+            { "id": 3, "nome": "Pippo", "estratto": false }
+        ];
 
         async function init() {
-            try {
-                // Se non ci sono dati nel browser, caricali dal JSON
-                const salvati = localStorage.getItem('db_disney');
-                
-                if (salvati) {
-                    personaggiiDB = JSON.parse(salvati);
-                } else {
-                    const response = await fetch('nomi.json');
-                    personaggiiDB = await response.json();
-                    salvaDati();
-                }
-                
-                document.getElementById('nome-estratto').innerText = "Pronto all'estrazione";
-                aggiornaUI();
-            } catch (e) {
-                document.getElementById('nome-estratto').innerText = "Errore caricamento nomi.json";
-            }
-        }
-
-        function salvaDati() {
-            localStorage.setItem('db_disney', JSON.stringify(personaggiiDB));
-        }
-
-        function aggiornaUI() {
-            const listaDiv = document.getElementById('lista-totale');
-            const ultima = parseInt(localStorage.getItem('ultimo_ts')) || 0;
-            const ultimoID = localStorage.getItem('ultimo_id');
-
-            // Mostriamo l'ultimo estratto nel display centrale
-            if (ultimoID) {
-                const p = personaggiiDB.find(x => x.id == ultimoID);
-                document.getElementById('numero-estratto').innerText = p.id;
-                document.getElementById('nome-estratto').innerText = p.nome;
-            }
-
-            // Generiamo la lista unica con i colori differenti
-            listaDiv.innerHTML = personaggiiDB
-                .sort((a,b) => a.id - b.id)
-                .map(p => `
-                    <div class="box ${p.estratto ? 'estratto' : 'rimanente'}">
-                        ${p.id} <span>${p.nome}</span>
-                    </div>
-                `).join('');
-
-            // Gestione Timer
-            const mancano = Math.max(0, Math.ceil((ultima + ATTESA_MS - Date.now()) / 1000));
-            const btn = document.getElementById('btn-estrai');
-            const rimasti = personaggiiDB.filter(p => !p.estratto).length;
-
-            if (rimasti === 0) {
-                btn.disabled = true;
-                btn.innerText = "COMPLETATO";
-            } else if (mancano > 0) {
-                btn.disabled = true;
-                document.getElementById('messaggio').innerText = `Attendi ${mancano}s...`;
-                setTimeout(aggiornaUI, 1000);
+            const locale = localStorage.getItem('disney_db_v1');
+            
+            if (locale) {
+                db = JSON.parse(locale);
             } else {
-                btn.disabled = false;
-                btn.innerText = "ESTRAI ORA";
-                document.getElementById('messaggio').innerText = "";
-            }
-        }
-
-        function avviaEstrazione() {
-            const numDisplay = document.getElementById('numero-estratto');
-            numDisplay.classList.add('rolling');
-            
-            let counter = 0;
-            const loop = setInterval(() => {
-                numDisplay.innerText = Math.floor(Math.random() * 99);
-                if (++counter > 15) {
-                    clearInterval(loop);
-                    numDisplay.classList.remove('rolling');
-                    eseguiLogica();
+                try {
+                    const resp = await fetch('nomi.json');
+                    if (!resp.ok) throw new Error();
+                    db = await resp.json();
+                } catch (e) {
+                    console.warn("JSON non accessibile, uso backup.");
+                    db = backupData;
                 }
-            }, 70);
-        }
-
-        function eseguiLogica() {
-            const disponibili = personaggiiDB.filter(p => !p.estratto);
-            if (disponibili.length === 0) return;
-
-            const scelto = disponibili[Math.floor(Math.random() * disponibili.length)];
-            
-            // AGGIORNIAMO IL JSON (nello stato locale)
-            scelto.estratto = true;
-
-            localStorage.setItem('ultimo_id', scelto.id);
-            localStorage.setItem('ultimo_ts', Date.now());
-            salvaDati();
+                salva();
+            }
+            document.getElementById('nome-estratto').innerText = "Pronto!";
             aggiornaUI();
         }
 
-        init();
-    </script>
-</body>
-</html>
+        function salva() {
+            localStorage.setItem('disney_db_v1', JSON.stringify(db));
+        }
+
+        function aggiornaUI() {
+            const grid = document.getElementById('lista-totale');
+            const ultimoTs = parseInt(localStorage.getItem('ultimo_ts')) || 0;
+            const ultimoId = localStorage.getItem('ultimo_id');
+
+            // Display centrale
+            if (ultimoId) {
+                const trovato = db.find(x => x.id == ultimoId);
+                if (trovato) {
+                    document.getElementById('numero-estratto').innerText = trovato.id;
+                    document.getElementById('nome-estratto').innerText = trovato.nome;
+                }
+            }
+
+            // Griglia
+            grid.innerHTML = db.sort((a,b) => a.id - b
