@@ -1,6 +1,6 @@
 [
   { "id": 1, "nome": "Topolino", "estratto": false },
-  { "id": 2, "nome": "Paperino", "estratto": false },
+  { "id": 2, "nome": "Paperino", "estratto": true },
   { "id": 3, "nome": "Pippo", "estratto": false },
   { "id": 4, "nome": "Pluto", "estratto": false },
   { "id": 5, "nome": "Minnie", "estratto": false }
