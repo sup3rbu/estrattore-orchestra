@@ -95,7 +95,7 @@
             const ultimoTs = parseInt(localStorage.getItem('ultimo_ts')) || 0;
             const ultimoId = localStorage.getItem('ultimo_id');
 
-            // Display centrale
+            // 1. Display centrale (mostra l'ultimo risultato)
             if (ultimoId) {
                 const trovato = db.find(x => x.id == ultimoId);
                 if (trovato) {
@@ -104,25 +104,26 @@
                 }
             }
 
-            // Griglia
+            // 2. Griglia (Mostra il nome SOLO SE p.estratto è true)
             grid.innerHTML = db.sort((a,b) => a.id - b.id).map(p => `
                 <div class="box ${p.estratto ? 'estratto' : 'rimanente'}">
-                    ${p.id} <span>${p.nome}</span>
+                    ${p.id} 
+                    <span>${p.estratto ? p.nome : '???'}</span>
                 </div>
             `).join('');
 
-            // Timer logica
+            // 3. Gestione Timer e Bottone
             const mancano = Math.max(0, Math.ceil((ultimoTs + COOLDOWN - Date.now()) / 1000));
             const btn = document.getElementById('btn-estrai');
             const disponibili = db.filter(p => !p.estratto).length;
 
             if (disponibili === 0) {
                 btn.disabled = true;
-                btn.innerText = "FINITO";
+                btn.innerText = "LISTA COMPLETATA";
             } else if (mancano > 0) {
                 btn.disabled = true;
-                document.getElementById('messaggio').innerText = `Attendi ${mancano}s...`;
-                setTimeout(aggiornaUI, 1000);
+                document.getElementById('messaggio').innerText = `Prossima estrazione tra ${mancano}s...`;
+                setTimeout(aggiornaUI, 1000); // Aggiorna ogni secondo per il countdown
             } else {
                 btn.disabled = false;
                 btn.innerText = "ESTRAI ORA";
