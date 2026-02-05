@@ -3,151 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estrazione rugaciune orchestra</title>
+    <title>Disney Name Lotto</title>
     <style>
-        :root { --primary: #6366f1; --accent: #f59e0b; --bg: #f8fafc; --card: #ffffff; }
+        :root { --primary: #6366f1; --accent: #ec4899; --bg: #f8fafc; --card: #ffffff; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .container { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; text-align: center; }
         
-        /* Display Centrale */
-        .slot { height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px; background: #f1f5f9; border-radius: 16px; }
-        #nome-estratto { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0; }
-        #numero-estratto { font-size: 1.1rem; color: var(--accent); font-weight: 600; margin: 5px 0 0 0; }
+        /* DISPLAY CENTRALE: Focus sul NOME */
+        .slot { height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 20px; border: 2px solid #e2e8f0; }
+        #nome-estratto { font-size: 2.8rem; font-weight: 900; color: var(--accent); margin: 0; line-height: 1.1; text-transform: uppercase; letter-spacing: -1px; }
+        #numero-estratto { font-size: 1.2rem; color: #64748b; font-weight: 600; margin-top: 10px; background: white; padding: 2px 12px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         
-        /* Animazione */
-        .rolling { animation: shuffle 0.1s infinite; filter: blur(2px); }
-        @keyframes shuffle { 0% { transform: translateY(-2px); } 100% { transform: translateY(2px); } }
+        /* Animazione durante l'attesa */
+        .rolling-name { animation: pulse 0.15s infinite; filter: blur(3px); color: #cbd5e1 !important; }
+        @keyframes pulse { 0% { transform: scale(0.98); } 100% { transform: scale(1.02); } }
 
-        button { width: 100%; padding: 16px; font-size: 1rem; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; box-shadow: 0 4px 0 #4338ca; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #4338ca; }
-        button:disabled { background: #cbd5e1; box-shadow: none; transform: none; cursor: not-allowed; }
+        button { width: 100%; padding: 18px; font-size: 1.2rem; font-weight: 800; border: none; border-radius: 15px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; box-shadow: 0 5px 0 #4338ca; margin-bottom: 10px; }
+        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #4338ca; }
+        button:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-        .info { font-size: 0.8rem; color: #94a3b8; margin: 10px 0; min-height: 1.2rem; }
+        .info { font-size: 0.85rem; color: #94a3b8; min-height: 1.5rem; }
 
-        /* Griglia */
-        .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin: 30px 0 10px; text-align: left; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
-        .grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .box { padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; transition: 0.3s; }
+        /* GRIGLIA: Focus leggibilità nomi estratti */
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin: 30px 0 15px; text-align: left; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
         
-        .rimanente { background: white; color: #1e293b; }
-        .estratto { background: #dcfce7; color: #15803d; border-color: #bbf7d0; text-decoration: line-through; opacity: 0.6; }
-        .box span { display: block; font-size: 0.65rem; font-weight: 400; text-decoration: none !important; }
+        .box { padding: 12px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-align: center; transition: 0.4s; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 4px; }
+        .rimanente { background: #f8fafc; color: #cbd5e1; }
+        .estratto { background: #dcfce7; color: #15803d; border-color: #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        .box .num-label { font-size: 0.6rem; opacity: 0.6; }
+        .box .name-label { font-size: 0.85rem; word-wrap: break-word; }
 
-        .btn-reset { background: none; border: none; color: #94a3b8; font-size: 0.7rem; text-decoration: underline; cursor: pointer; margin-top: 20px; box-shadow: none; width: auto; }
+        .btn-reset { background: none; border: none; color: #94a3b8; font-size: 0.75rem; text-decoration: underline; cursor: pointer; margin-top: 25px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="margin-top:0; color:#1e293b;">In saptamana aceasta ne vom ruga pentru:</h2>
+        <h2 style="margin-top:0; color:#1e293b;">Disney Lotto ✨</h2>
         
         <div class="slot">
-            <p id="numero-estratto">--</p>
-            <p id="nome-estratto">Inizializzazione...</p>
+            <p id="nome-estratto">PRONTO?</p>
+            <p id="numero-estratto">n. --</p>
         </div>
         
         <button id="btn-estrai" onclick="avviaEstrazione()" disabled>CARICAMENTO...</button>
         <p id="messaggio" class="info"></p>
 
-        <div class="section-title">Lista</div>
+        <div class="section-title">Album Personaggi</div>
         <div id="lista-totale" class="grid"></div>
 
-        <button class="btn-reset" onclick="resetGame()">Reset</button>
+        <button class="btn-reset" onclick="resetGame()">Svuota memoria e ricomincia</button>
     </div>
 
     <script>
         let db = [];
         const COOLDOWN = 5000; // 5 secondi per il test
 
-        // Lista di emergenza se il fetch fallisce (es. test in locale)
-        const backupData = [
-            { "id": 1, "nome": "Topolino", "estratto": false },
-            { "id": 2, "nome": "Paperino", "estratto": false },
-            { "id": 3, "nome": "Pippo", "estratto": false }
-        ];
-
         async function init() {
-            const locale = localStorage.getItem('disney_db_v1');
-            
+            const locale = localStorage.getItem('disney_db_v2');
             if (locale) {
                 db = JSON.parse(locale);
             } else {
                 try {
                     const resp = await fetch('nomi.json');
-                    if (!resp.ok) throw new Error();
                     db = await resp.json();
                 } catch (e) {
-                    console.warn("JSON non accessibile, uso backup.");
-                    db = backupData;
+                    // Fallback se il file non è accessibile (es. test locale)
+                    db = [
+                        { "id": 1, "nome": "Topolino", "estratto": false },
+                        { "id": 2, "nome": "Paperino", "estratto": false },
+                        { "id": 3, "nome": "Pippo", "estratto": false },
+                        { "id": 4, "nome": "Pluto", "estratto": false },
+                        { "id": 5, "nome": "Minnie", "estratto": false }
+                    ];
                 }
                 salva();
             }
-            document.getElementById('nome-estratto').innerText = "Pronto!";
             aggiornaUI();
         }
 
-        function salva() {
-            localStorage.setItem('disney_db_v1', JSON.stringify(db));
-        }
+        function salva() { localStorage.setItem('disney_db_v2', JSON.stringify(db)); }
 
         function aggiornaUI() {
             const grid = document.getElementById('lista-totale');
             const ultimoTs = parseInt(localStorage.getItem('ultimo_ts')) || 0;
             const ultimoId = localStorage.getItem('ultimo_id');
 
-            // 1. Display centrale (mostra l'ultimo risultato)
+            // 1. DISPLAY CENTRALE: NOME GRANDE
             if (ultimoId) {
                 const trovato = db.find(x => x.id == ultimoId);
                 if (trovato) {
-                    document.getElementById('numero-estratto').innerText = trovato.id;
                     document.getElementById('nome-estratto').innerText = trovato.nome;
+                    document.getElementById('numero-estratto').innerText = "Numero " + trovato.id;
                 }
             }
 
-            // 2. Griglia (Mostra il nome SOLO SE p.estratto è true)
+            // 2. GRIGLIA: Mostra nomi solo se estratti
             grid.innerHTML = db.sort((a,b) => a.id - b.id).map(p => `
                 <div class="box ${p.estratto ? 'estratto' : 'rimanente'}">
-                    ${p.id} 
-                    <span>${p.estratto ? p.nome : '???'}</span>
+                    <span class="num-label"># ${p.id}</span>
+                    <span class="name-label">${p.estratto ? p.nome : '???'}</span>
                 </div>
             `).join('');
 
-            // 3. Gestione Timer e Bottone
+            // 3. LOGICA BOTTONE
             const mancano = Math.max(0, Math.ceil((ultimoTs + COOLDOWN - Date.now()) / 1000));
             const btn = document.getElementById('btn-estrai');
             const disponibili = db.filter(p => !p.estratto).length;
 
             if (disponibili === 0) {
                 btn.disabled = true;
-                btn.innerText = "LISTA COMPLETATA";
+                btn.innerText = "TUTTI ESTRATTI!";
             } else if (mancano > 0) {
                 btn.disabled = true;
                 document.getElementById('messaggio').innerText = `Prossima estrazione tra ${mancano}s...`;
-                setTimeout(aggiornaUI, 1000); // Aggiorna ogni secondo per il countdown
+                setTimeout(aggiornaUI, 1000);
             } else {
                 btn.disabled = false;
-                btn.innerText = "ESTRAI ORA";
+                btn.innerText = "ESTRAI PERSONAGGIO";
                 document.getElementById('messaggio').innerText = "";
             }
         }
 
         function avviaEstrazione() {
+            const nomeEl = document.getElementById('nome-estratto');
             const numEl = document.getElementById('numero-estratto');
-            numEl.classList.add('rolling');
+            nomeEl.classList.add('rolling-name');
             document.getElementById('btn-estrai').disabled = true;
 
             let count = 0;
+            const fakeNames = ["CARICAMENTO", "CHI SARÀ?", "ATTENDI", "CONTROLLO", "SQUADRA"];
             const timer = setInterval(() => {
-                numEl.innerText = Math.floor(Math.random() * 99);
-                if (++count > 12) {
+                nomeEl.innerText = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+                numEl.innerText = "n. " + Math.floor(Math.random() * 99);
+                if (++count > 15) {
                     clearInterval(timer);
-                    numEl.classList.remove('rolling');
-                    estrai();
+                    nomeEl.classList.remove('rolling-name');
+                    eseguiEstrazione();
                 }
             }, 80);
         }
 
-        function estrai() {
+        function eseguiEstrazione() {
             const liberi = db.filter(p => !p.estratto);
             if (liberi.length === 0) return;
 
@@ -161,7 +160,7 @@
         }
 
         function resetGame() {
-            if(confirm("Vuoi resettare tutte le estrazioni?")) {
+            if(confirm("Vuoi cancellare i progressi e resettare i nomi?")) {
                 localStorage.clear();
                 location.reload();
             }
