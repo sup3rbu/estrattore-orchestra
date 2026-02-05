@@ -35,35 +35,10 @@
         .box .num-label { font-size: 0.6rem; opacity: 0.6; }
         .box .name-label { font-size: 0.85rem; word-wrap: break-word; }
 
-        .btn-reset {
-    margin-top: 40px;
-    padding: 10px 20px;
-    background-color: #fee2e2; /* Rosso chiarissimo */
-    color: #ef4444;           /* Rosso acceso per il testo */
-    border: 2px solid #fecaca;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.btn-reset:hover {
-    background-color: #ef4444;
-    color: white;
-    border-color: #dc2626;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
-
-.btn-reset::before {
-    content: "↺"; /* Icona di reset */
-    font-size: 1.1rem;
-}
+        .btn-reset { margin-top: 40px;padding: 12px 24px;font-size: 0.85rem;font-weight: 800;border: none;border-radius: 12px;cursor: pointer;background: #ef4444; /* Rosso */color: white;transition: all 0.2s;box-shadow: 0 4px 0 #b91c1c; /* Ombra scura per effetto 3D */text-transform: uppercase;display: inline-flex;align-items: center;gap: 8px;}
+        .btn-reset:active {transform: translateY(2px);box-shadow: 0 2px 0 #b91c1c;}
+        .btn-reset::before {content: "↺";font-size: 1rem;}
+        
     </style>
 </head>
 <body>
