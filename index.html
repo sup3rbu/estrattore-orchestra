@@ -9,28 +9,26 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .container { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; text-align: center; }
         
-        /* Display Centrale */
         .slot { height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 20px; border: 2px solid #e2e8f0; }
         #nome-estratto { font-size: 2.5rem; font-weight: 900; color: var(--accent); margin: 0; text-transform: uppercase; }
         #numero-estratto { font-size: 1.1rem; color: #64748b; font-weight: 600; margin-top: 10px; background: white; padding: 2px 12px; border-radius: 20px; }
         
-        /* Bottoni Stile 3D */
+        .rolling-name { animation: pulse 0.15s infinite; filter: blur(2px); color: #94a3b8 !important; }
+        @keyframes pulse { 0% { transform: scale(0.98); } 100% { transform: scale(1.02); } }
+
         button { width: 100%; padding: 18px; font-size: 1.2rem; font-weight: 800; border: none; border-radius: 15px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; box-shadow: 0 5px 0 #4338ca; margin-bottom: 10px; text-transform: uppercase; }
         button:active { transform: translateY(3px); box-shadow: 0 2px 0 #4338ca; }
         button:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
 
-        /* Bottone Reset 3D Piccolo */
         .btn-reset { width: auto; padding: 12px 24px; font-size: 0.85rem; background: var(--danger); box-shadow: 0 4px 0 var(--danger-dark); margin-top: 40px; }
         .btn-reset:active { box-shadow: 0 2px 0 var(--danger-dark); }
         .btn-reset::before { content: "↺ "; }
 
-        .info { font-size: 0.9rem; color: #64748b; min-height: 1.5rem; font-weight: 600; background: #fff1f2; padding: 10px; border-radius: 10px; display: none; }
+        .info { font-size: 0.9rem; color: #64748b; font-weight: 600; background: #fff1f2; padding: 10px; border-radius: 10px; margin-top: 10px; display: none; }
 
-        /* Griglia */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
-        .box { padding: 12px 8px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 4px; background: #f8fafc; color: #cbd5e1; font-weight: 700; }
-        .estratto { background: #dcfce7; color: #15803d; border-color: #bbf7d0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .box .name-label { font-size: 0.85rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 30px; }
+        .box { padding: 12px 8px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 4px; background: #f8fafc; color: #cbd5e1; font-weight: 700; transition: 0.3s; }
+        .estratto { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
     </style>
 </head>
 <body>
@@ -39,7 +37,7 @@
         <h2 style="margin:0; color:#1e293b;">Disney Weekly Lotto</h2>
         
         <div class="slot">
-            <p id="nome-estratto">CHI USCIRÀ?</p>
+            <p id="nome-estratto">PRONTO?</p>
             <p id="numero-estratto">n. --</p>
         </div>
         
@@ -53,11 +51,11 @@
 
     <script>
         let db = [];
-        // 1 Settimana (7gg) - 2 ore in millisecondi
         const COOLDOWN = (7 * 24 * 60 * 60 * 1000) - (2 * 60 * 60 * 1000);
+        const FAKE_NAMES = ["SCELTA...", "CHI SARÀ?", "ATTENDI", "CERCO", "SQUADRA", "REALE", "MAGIA"];
 
         async function init() {
-            const locale = localStorage.getItem('disney_db_weekly');
+            const locale = localStorage.getItem('disney_db_weekly_v3');
             if (locale) {
                 db = JSON.parse(locale);
             } else {
@@ -72,7 +70,7 @@
             aggiornaUI();
         }
 
-        function salva() { localStorage.setItem('disney_db_weekly', JSON.stringify(db)); }
+        function salva() { localStorage.setItem('disney_db_weekly_v3', JSON.stringify(db)); }
 
         function aggiornaUI() {
             const ultimoTs = parseInt(localStorage.getItem('ultimo_ts')) || 0;
@@ -88,7 +86,7 @@
             document.getElementById('lista-totale').innerHTML = db.sort((a,b)=>a.id-b.id).map(p => `
                 <div class="box ${p.estratto ? 'estratto' : ''}">
                     <span style="font-size:0.6rem">#${p.id}</span>
-                    <span class="name-label">${p.estratto ? p.nome : '???'}</span>
+                    <span style="font-size:0.85rem">${p.estratto ? p.nome : '???'}</span>
                 </div>
             `).join('');
 
@@ -102,32 +100,37 @@
                 btn.disabled = true;
                 msg.style.display = "block";
                 
-                // Calcolo tempo rimanente leggibile
-                const giorni = Math.floor(mancanoMs / (1000 * 60 * 60 * 24));
-                const ore = Math.floor((mancanoMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minuti = Math.floor((mancanoMs % (1000 * 60 * 60)) / (1000 * 60));
+                const d = Math.floor(mancanoMs / (1000 * 60 * 60 * 24));
+                const h = Math.floor((mancanoMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((mancanoMs % (1000 * 60 * 60)) / (1000 * 60));
                 
-                msg.innerText = `Prossima estrazione tra: ${giorni}g ${ore}o ${minuti}m`;
-                setTimeout(aggiornaUI, 60000); // Aggiorna ogni minuto
+                msg.innerText = `Prossima estrazione tra: ${d}g ${h}o ${m}m`;
+                setTimeout(aggiornaUI, 60000);
             } else {
                 btn.disabled = false;
-                btn.innerText = "ESTRAI PERSONAGGIO";
+                btn.innerText = "ESTRAI ORA";
                 msg.style.display = "none";
             }
         }
 
         function avviaEstrazione() {
             const nomeEl = document.getElementById('nome-estratto');
-            nomeEl.style.filter = "blur(4px)";
+            const numEl = document.getElementById('numero-estratto');
+            const btn = document.getElementById('btn-estrai');
+            
+            btn.disabled = true;
+            nomeEl.classList.add('rolling-name');
+
             let count = 0;
             const timer = setInterval(() => {
-                nomeEl.innerText = ".......";
-                if (++count > 10) {
+                nomeEl.innerText = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
+                numEl.innerText = "n. " + Math.floor(Math.random() * 99);
+                if (++count > 15) {
                     clearInterval(timer);
-                    nomeEl.style.filter = "none";
+                    nomeEl.classList.remove('rolling-name');
                     esegui();
                 }
-            }, 100);
+            }, 80);
         }
 
         function esegui() {
@@ -141,7 +144,7 @@
         }
 
         function resetGame() {
-            if(confirm("Attenzione! Vuoi davvero resettare tutto?")) {
+            if(confirm("Sei sicuro? Questo cancellerà tutti i progressi.")) {
                 localStorage.clear();
                 location.reload();
             }
