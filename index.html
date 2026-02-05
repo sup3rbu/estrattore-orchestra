@@ -35,7 +35,35 @@
         .box .num-label { font-size: 0.6rem; opacity: 0.6; }
         .box .name-label { font-size: 0.85rem; word-wrap: break-word; }
 
-        .btn-reset { background: none; border: none; color: #94a3b8; font-size: 0.75rem; text-decoration: underline; cursor: pointer; margin-top: 25px; }
+        .btn-reset {
+    margin-top: 40px;
+    padding: 10px 20px;
+    background-color: #fee2e2; /* Rosso chiarissimo */
+    color: #ef4444;           /* Rosso acceso per il testo */
+    border: 2px solid #fecaca;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-reset:hover {
+    background-color: #ef4444;
+    color: white;
+    border-color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.btn-reset::before {
+    content: "↺"; /* Icona di reset */
+    font-size: 1.1rem;
+}
     </style>
 </head>
 <body>
@@ -54,7 +82,7 @@
         <div class="section-title">Album Personaggi</div>
         <div id="lista-totale" class="grid"></div>
 
-        <button class="btn-reset" onclick="resetGame()">Svuota memoria e ricomincia</button>
+        <button class="btn-reset" onclick="resetGame()">Svuota e ricomincia da zero</button>
     </div>
 
     <script>
