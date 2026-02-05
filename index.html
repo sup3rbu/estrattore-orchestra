@@ -11,8 +11,8 @@
         
         /* Display Centrale */
         .slot { height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px; background: #f1f5f9; border-radius: 16px; }
-        #numero-estratto { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0; }
-        #nome-estratto { font-size: 1.1rem; color: var(--accent); font-weight: 600; margin: 5px 0 0 0; }
+        #nome-estratto { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 0; }
+        #numero-estratto { font-size: 1.1rem; color: var(--accent); font-weight: 600; margin: 5px 0 0 0; }
         
         /* Animazione */
         .rolling { animation: shuffle 0.1s infinite; filter: blur(2px); }
@@ -39,7 +39,7 @@
 <body>
 
     <div class="container">
-        <h2 style="margin-top:0; color:#1e293b;">Disney Lotto</h2>
+        <h2 style="margin-top:0; color:#1e293b;">In saptamana aceasta ne vom ruga pentru:</h2>
         
         <div class="slot">
             <p id="numero-estratto">--</p>
@@ -49,10 +49,10 @@
         <button id="btn-estrai" onclick="avviaEstrazione()" disabled>CARICAMENTO...</button>
         <p id="messaggio" class="info"></p>
 
-        <div class="section-title">Lista Personaggi</div>
+        <div class="section-title">Lista</div>
         <div id="lista-totale" class="grid"></div>
 
-        <button class="btn-reset" onclick="resetGame()">Resetta tutto e ricarica JSON</button>
+        <button class="btn-reset" onclick="resetGame()">Reset</button>
     </div>
 
     <script>
